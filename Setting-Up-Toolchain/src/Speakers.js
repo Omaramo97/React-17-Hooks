@@ -8,6 +8,7 @@ import { GlobalContext } from "./GlobalState";
 const Speakers = ({}) => {
   const [speakingSaturday, setSpeakingSaturday] = useState(true);
   const [speakingSunday, setSpeakingSunday] = useState(true);
+  const [favoritedSpeaker, setFavoritedSpeaker] = useState(true);
   const context = useContext(ConfigContext);
 
   const {
@@ -32,6 +33,11 @@ const Speakers = ({}) => {
     setSpeakingSunday(!speakingSunday);
   };
 
+  const handleFavoritedSpeaker = () => {
+    forceImageRerender();
+    setFavoritedSpeaker(!favoritedSpeaker);
+  };
+
   const heartFavoriteHandler = useCallback((e, speakerRec) => {
     e.preventDefault();
     toggleSpeakerFavorite(speakerRec);
@@ -41,7 +47,11 @@ const Speakers = ({}) => {
     () =>
       speakerList
         .filter(
-          ({ sat, sun }) => (speakingSaturday && sat) || (speakingSunday && sun)
+          ({ sat, sun, favorite }) =>
+            (speakingSaturday && sat && favoritedSpeaker && favorite) ||
+            (speakingSunday && sun && favoritedSpeaker && favorite) ||
+            (speakingSaturday && sat && !favoritedSpeaker && !favorite) ||
+            (speakingSunday && sun && !favoritedSpeaker && !favorite)
         )
         .sort(function (a, b) {
           if (a.firstName < b.firstName) {
@@ -52,7 +62,7 @@ const Speakers = ({}) => {
           }
           return 0;
         }),
-    [speakingSaturday, speakingSunday, speakerList]
+    [speakingSaturday, speakingSunday, favoritedSpeaker, speakerList]
   );
 
   const speakerListFiltered = isLoading ? [] : newSpeakerList;
@@ -90,6 +100,18 @@ const Speakers = ({}) => {
                     checked={speakingSunday}
                   />
                   Sunday Speakers
+                </label>
+              </div>
+
+              <div className="form-check-inline">
+                <label className="form-check-label">
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    onChange={handleFavoritedSpeaker}
+                    checked={favoritedSpeaker}
+                  />
+                  Favorite Speakers
                 </label>
               </div>
             </div>
